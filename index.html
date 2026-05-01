@@ -1,0 +1,2448 @@
+<!DOCTYPE html>
+<html lang="en"><head><script id="__tbg_embedded_state__">window.__TBG_EMBEDDED_STATE__ = {"client":{"name":"","contact":"","email":"","phone":""},"event":{"name":"","date":"","ref":"BG-TI184","rep":""},"venue":"glasshouse","space":"main-event","hire":"event-space","guests":100,"eventType":"cocktail","packageId":null,"beverageId":"bev-none","extras":{},"customExtras":[],"notes":""};</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Big Group — Quote Builder</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500&amp;family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,500;1,9..144,600&amp;display=swap" rel="stylesheet">
+<script>
+  // Apply saved theme immediately to avoid flash of unstyled theme
+  (function() {
+    try {
+      var t = localStorage.getItem("tbg_theme");
+      if (t === "dark") document.documentElement.setAttribute("data-theme", "dark");
+    } catch(e) {}
+  })();
+</script>
+<style>
+  /* ===== LIGHT THEME (default) ===== */
+  :root {
+    --bg:        #fafaf7;
+    --bg-2:      #f2f0ea;
+    --surface:   #ffffff;
+    --ink:       #0a0a0a;
+    --ink-soft:  #1a1a1a;
+    --muted:     #6b6b6b;
+    --line:      #d8d4cc;
+    --line-soft: #e8e5dd;
+
+    --brand-red: #e62b2b;     /* "THE BIG GROUP" wordmark colour */
+    --brand-red-2: #c8231e;   /* darker for hover */
+    --good:      #2d6a4f;
+    --warn:      #c9701a;
+
+    /* Header is always black with white type — invariant in both themes */
+    --header-bg: #0a0a0a;
+    --header-fg: #ffffff;
+
+    /* Input fields */
+    --field-bg: #ffffff;
+    --field-fg: #0a0a0a;
+
+    /* Selected card surface */
+    --pkg-selected-bg: #0a0a0a;
+    --pkg-selected-fg: #ffffff;
+  }
+
+  /* ===== DARK THEME ===== */
+  [data-theme="dark"] {
+    --bg:        #0a0a0a;
+    --bg-2:      #141414;
+    --surface:   #1a1a1a;
+    --ink:       #f5f5f2;
+    --ink-soft:  #e8e8e3;
+    --muted:     #8b8b85;
+    --line:      #2a2a2a;
+    --line-soft: #1f1f1f;
+
+    --brand-red: #e62b2b;
+    --brand-red-2: #ff3a3a;
+    --good:      #4ea878;
+    --warn:      #e0913f;
+
+    --header-bg: #0a0a0a;
+    --header-fg: #ffffff;
+
+    --field-bg: #1a1a1a;
+    --field-fg: #f5f5f2;
+
+    --pkg-selected-bg: #e62b2b;
+    --pkg-selected-fg: #ffffff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Work Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    font-feature-settings: 'kern' 1, 'liga' 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .serif { font-family: 'Fraunces', 'Times New Roman', Times, serif; font-style: italic; }
+  .italic { font-style: italic; }
+
+  /* ===== HEADER ===== */
+  header.brand {
+    background: var(--header-bg);
+    color: var(--header-fg);
+    padding: 22px 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 4px solid var(--header-bg);
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .brand-mark {
+    font-family: 'Work Sans', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    font-size: 16px;
+    text-transform: uppercase;
+    color: var(--brand-red);
+  }
+  .brand-tag {
+    font-family: 'Fraunces', 'Times New Roman', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 17px;
+    color: rgba(255,255,255,0.75);
+  }
+  .brand-actions { display: flex; gap: 8px; align-items: center; }
+  .brand-sep {
+    width: 1px;
+    height: 22px;
+    background: rgba(255,255,255,0.2);
+    margin: 0 4px;
+  }
+  .brand-actions button {
+    background: transparent;
+    color: var(--header-fg);
+    border: 1px solid rgba(255,255,255,0.35);
+    padding: 8px 14px;
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-family: 'Work Sans', sans-serif;
+    font-weight: 600;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+  .brand-actions button:hover { background: var(--header-fg); color: var(--header-bg); }
+  .brand-actions button.primary {
+    background: var(--brand-red);
+    border-color: var(--brand-red);
+  }
+  .brand-actions button.primary:hover { background: var(--brand-red-2); border-color: var(--brand-red-2); color: white; }
+  .brand-actions button.icon-only {
+    padding: 8px 10px;
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  /* ===== LAYOUT ===== */
+  .wrap {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    min-height: calc(100vh - 80px);
+  }
+  main { padding: 32px 40px 80px; max-width: 100%; overflow-x: hidden; }
+  aside.summary {
+    background: var(--bg-2);
+    border-left: 1px solid var(--line);
+    padding: 32px 28px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  /* ===== TYPOGRAPHY ===== */
+  h1.page-title {
+    font-family: 'Work Sans', sans-serif;
+    font-size: 44px;
+    font-weight: 400;
+    margin-bottom: 4px;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    color: var(--ink);
+  }
+  h1.page-title em {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+  }
+  .subline {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 28px;
+    letter-spacing: 0.02em;
+  }
+  h2.section {
+    font-family: 'Work Sans', sans-serif;
+    font-size: 28px;
+    font-weight: 400;
+    margin-top: 36px;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+  }
+  h2.section em {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+  }
+  h2.section .step-num {
+    font-family: 'Work Sans', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-style: normal;
+    font-weight: 600;
+  }
+  h3.subsection {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin: 18px 0 10px;
+    font-weight: 700;
+  }
+
+  /* ===== FORM CONTROLS ===== */
+  .field-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+    margin-bottom: 14px;
+  }
+  label.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  label.field span.lbl {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  input[type=text], input[type=number], input[type=date], input[type=email], input[type=tel], select, textarea {
+    background: var(--field-bg);
+    border: 1px solid var(--line);
+    padding: 10px 12px;
+    font-family: 'Work Sans', sans-serif;
+    font-size: 14px;
+    color: var(--field-fg);
+    outline: none;
+    transition: border 0.15s, background 0.2s, color 0.2s;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--brand-red);
+  }
+  textarea { resize: vertical; min-height: 60px; }
+
+  /* ===== PACKAGE CARDS ===== */
+  .pkg-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .pkg-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 18px 18px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    color: var(--ink);
+  }
+  .pkg-card:hover { border-color: var(--brand-red); }
+  .pkg-card.selected {
+    border-color: var(--brand-red);
+    border-width: 2px;
+    padding: 17px 17px 15px;
+    background: var(--pkg-selected-bg);
+    color: var(--pkg-selected-fg);
+  }
+  .pkg-card.selected .pkg-name,
+  .pkg-card.selected .pkg-price { color: var(--pkg-selected-fg); }
+  .pkg-card.selected .pkg-desc { color: rgba(255,255,255,0.78); }
+  .pkg-card.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 10px; right: 12px;
+    color: var(--pkg-selected-fg);
+    font-weight: 900;
+    font-size: 16px;
+  }
+  [data-theme="dark"] .pkg-card.selected::after { color: #fff; }
+  .pkg-name {
+    font-family: 'Work Sans', sans-serif;
+    font-size: 19px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+  }
+  .pkg-name em {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+  }
+  .pkg-duration {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .pkg-card.selected .pkg-duration { color: rgba(255,255,255,0.65); }
+  .pkg-price {
+    font-family: 'Work Sans', sans-serif;
+    font-size: 30px;
+    font-weight: 300;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+  .pkg-price small { font-size: 12px; color: var(--muted); font-weight: 400; }
+  .pkg-card.selected .pkg-price small { color: rgba(255,255,255,0.65); }
+  .pkg-desc {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--ink);
+    flex: 1;
+  }
+  .pkg-includes {
+    font-size: 11px;
+    line-height: 1.5;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--line-soft);
+  }
+  .pkg-card.selected .pkg-includes { border-top-color: rgba(255,255,255,0.2); }
+  .pkg-includes ul { list-style: none; padding-left: 0; }
+  .pkg-includes li { padding-left: 12px; position: relative; margin-bottom: 2px; }
+  .pkg-includes li::before {
+    content: '·';
+    position: absolute;
+    left: 0;
+    font-weight: 900;
+  }
+
+  /* ===== TABS ===== */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 18px;
+    gap: 0;
+  }
+  .tab {
+    padding: 10px 20px;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-family: inherit;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    font-weight: 600;
+  }
+  .tab.active {
+    color: var(--ink);
+    border-bottom-color: var(--brand-red);
+  }
+
+  /* ===== EXTRAS LIST ===== */
+  .extras-section { margin-bottom: 24px; }
+  .extras-cat-title {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin: 22px 0 10px;
+    font-weight: 700;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed var(--line);
+  }
+  .extra-row {
+    display: grid;
+    grid-template-columns: 1fr 110px 80px 90px 28px;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px dotted var(--line-soft);
+    font-size: 13px;
+    color: var(--ink);
+  }
+  .extra-row:hover { background: var(--bg-2); }
+  .extra-row .ex-name {
+    display: flex;
+    flex-direction: column;
+  }
+  .extra-row .ex-name strong { font-weight: 600; }
+  .extra-row .ex-name small { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .extra-row .ex-unit {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .extra-row input[type=number] {
+    padding: 6px 8px;
+    font-size: 13px;
+    text-align: right;
+  }
+  .extra-row .ex-price {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+  }
+  .extra-row button.del {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 4px;
+  }
+  .extra-row button.del:hover { color: var(--brand-red); }
+
+  .add-custom {
+    background: var(--surface);
+    border: 1px dashed var(--line);
+    padding: 14px;
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 100px;
+    gap: 10px;
+    align-items: end;
+  }
+  .add-custom button {
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    padding: 10px;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-family: 'Work Sans', sans-serif;
+    font-weight: 600;
+  }
+  .add-custom button:hover { background: var(--brand-red); color: #fff; }
+
+  /* ===== SUMMARY SIDEBAR ===== */
+  .sum-title {
+    font-family: 'Work Sans', sans-serif;
+    font-size: 26px;
+    font-weight: 400;
+    margin-bottom: 4px;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .sum-title em {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+  }
+  .sum-sub {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 22px;
+  }
+
+  .sum-block {
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--line);
+  }
+  .sum-block:last-of-type { border-bottom: none; }
+  .sum-block-title {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+  .sum-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 4px 0;
+    font-size: 13px;
+    gap: 8px;
+  }
+  .sum-line .lbl { color: var(--ink); flex: 1; }
+  .sum-line .val {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    text-align: right;
+    white-space: nowrap;
+  }
+  .sum-line.dim .lbl, .sum-line.dim .val { color: var(--muted); font-weight: 400; }
+
+  .sum-total {
+    background: var(--ink);
+    color: var(--bg);
+    padding: 18px 16px;
+    margin: 18px -28px -32px;
+    margin-top: 24px;
+  }
+  [data-theme="dark"] .sum-total {
+    background: var(--brand-red);
+    color: #fff;
+  }
+  .sum-total .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 3px 0;
+    font-size: 12px;
+  }
+  .sum-total .row.big {
+    font-family: 'Work Sans', sans-serif;
+    font-size: 24px;
+    font-weight: 300;
+    margin-top: 8px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.2);
+    letter-spacing: -0.02em;
+  }
+  .sum-total .row.big .val { color: var(--brand-red); font-weight: 500; }
+  [data-theme="dark"] .sum-total .row.big .val { color: #fff; }
+  .sum-total .row .val {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+  }
+
+  .sum-empty {
+    color: var(--muted);
+    font-style: italic;
+    font-size: 13px;
+    padding: 8px 0;
+  }
+
+  /* ===== TOAST ===== */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(120%);
+    background: var(--ink);
+    color: var(--bg);
+    padding: 12px 24px;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+    font-weight: 600;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.error { background: var(--brand-red); color: #fff; }
+  .toast.good { background: var(--good); color: #fff; }
+
+  /* ===== UTILITY ===== */
+  .row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .hint {
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+    margin-top: 6px;
+  }
+  .pill {
+    display: inline-block;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 2px 8px;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-left: 8px;
+    font-weight: 600;
+    border-radius: 2px;
+  }
+  .pill.warn { background: var(--warn); }
+  .pill.good { background: var(--good); }
+
+  /* ===== AUTOSAVE INDICATOR ===== */
+  .autosave-status {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 12px;
+    text-align: center;
+  }
+  .autosave-status .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: var(--good);
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 1100px) {
+    .wrap { grid-template-columns: 1fr; }
+    aside.summary { position: static; height: auto; border-left: none; border-top: 1px solid var(--line); }
+    .extra-row { grid-template-columns: 1fr 90px 70px 80px 28px; }
+  }
+  @media (max-width: 600px) {
+    main { padding: 22px 18px 60px; }
+    aside.summary { padding: 22px 18px; }
+    h1.page-title { font-size: 32px; }
+    .field-row { grid-template-columns: 1fr; }
+    .add-custom { grid-template-columns: 1fr; }
+    .extra-row { grid-template-columns: 1fr 1fr; gap: 6px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="brand">
+  <div class="brand-mark">THE BIG GROUP</div>
+  <div class="brand-tag">Quote Builder</div>
+  <div class="brand-actions">
+    <button id="btn-theme" class="icon-only" title="Switch to dark mode" aria-label="Toggle dark mode">☾</button>
+    <button id="btn-blank" title="Download a blank copy of this app to share">Blank Template</button>
+    <button id="btn-clear" title="Clear all fields and start a new quote">Clear</button>
+    <span class="brand-sep"></span>
+    <button id="btn-import" title="Load a saved quote (JSON or HTML)">Open</button>
+    <button id="btn-save-html" title="Save current quote as a standalone HTML file">Save as HTML</button>
+    <button id="btn-export-json" title="Save current quote as a JSON data file">Save Data</button>
+    <button id="btn-export-pdf" class="primary" title="Generate branded PDF quote">Export PDF</button>
+  </div>
+</header>
+
+<input type="file" id="import-file" accept="application/json,text/html,.json,.html" style="display:none">
+
+<div class="wrap">
+<main>
+
+  <h1 class="page-title">Build a <em>Quote</em></h1>
+  <p class="subline">Glasshouse · Olympic Park Oval, Melbourne · Valid until 31 December 2026</p>
+
+  <!-- ============ STEP 1: CLIENT & EVENT ============ -->
+  <h2 class="section"><span><em>Client</em> &amp; Event</span><span class="step-num">Step 01</span></h2>
+
+  <div class="field-row">
+    <label class="field">
+      <span class="lbl">Client / Company</span>
+      <input type="text" id="client-name" placeholder="e.g. Acme Pty Ltd">
+    </label>
+    <label class="field">
+      <span class="lbl">Contact Name</span>
+      <input type="text" id="client-contact" placeholder="Primary contact">
+    </label>
+    <label class="field">
+      <span class="lbl">Contact Email</span>
+      <input type="email" id="client-email" placeholder="name@company.com">
+    </label>
+    <label class="field">
+      <span class="lbl">Contact Phone</span>
+      <input type="tel" id="client-phone" placeholder="+61 ...">
+    </label>
+  </div>
+
+  <div class="field-row">
+    <label class="field">
+      <span class="lbl">Event Name</span>
+      <input type="text" id="event-name" placeholder="e.g. Annual Awards Gala">
+    </label>
+    <label class="field">
+      <span class="lbl">Event Date</span>
+      <input type="date" id="event-date">
+    </label>
+    <label class="field">
+      <span class="lbl">Quote Reference</span>
+      <input type="text" id="quote-ref" placeholder="Auto-generated">
+    </label>
+    <label class="field">
+      <span class="lbl">Sales Rep</span>
+      <input type="text" id="sales-rep" placeholder="Your name">
+    </label>
+  </div>
+
+  <!-- ============ STEP 2: VENUE ============ -->
+  <h2 class="section"><span>Venue &amp; <em>Space</em></span><span class="step-num">Step 02</span></h2>
+
+  <div class="field-row">
+    <label class="field">
+      <span class="lbl">Venue</span>
+      <select id="venue">
+        <option value="glasshouse">Glasshouse</option>
+      </select>
+    </label>
+    <label class="field">
+      <span class="lbl">Space</span>
+      <select id="space"><option value="main-event">Main Event Space + Pre-Event Space</option><option value="main-balcony">Main Event Space + Balcony</option><option value="larger-half">Larger Half</option><option value="smaller-half">Smaller Half</option><option value="pre-event">Pre-Event Space (only)</option><option value="boardroom">Boardroom</option><option value="exec-suites">Executive Suites</option></select>
+    </label>
+    <label class="field">
+      <span class="lbl">Hire Type</span>
+      <select id="hire-type"><option value="event-space">Event Space (evening) — $3,500</option></select>
+    </label>
+    <label class="field">
+      <span class="lbl">Guest Count <span id="guest-warn"><span class="pill good">Min met</span></span></span>
+      <input type="number" id="guests" min="1" value="100">
+    </label>
+  </div>
+  <p class="hint">Standard packages assume a minimum of 100 guests. Below this, additional charges apply.</p>
+
+  <!-- ============ STEP 3: EVENT TYPE / PACKAGE ============ -->
+  <h2 class="section"><span>Event <em>Package</em></span><span class="step-num">Step 03</span></h2>
+
+  <div class="tabs" id="event-tabs">
+    <button class="tab active" data-event="cocktail">Cocktail Party</button>
+    <button class="tab" data-event="plated">Plated &amp; Shared Dining</button>
+    <button class="tab" data-event="corporate">Corporate</button>
+  </div>
+
+  <div id="package-grid" class="pkg-grid"><div class="pkg-card">
+      <div class="pkg-name"><em>Two Hour Cocktail Party</em></div>
+      <div class="pkg-duration">2 hours</div>
+      <div class="pkg-price">$140 <small>per person</small></div>
+      <div class="pkg-desc">Inclusive of 7 canape items and two hour Classic Beverage Package.</div>
+      <div class="pkg-includes">
+        <ul><li>7 canape items</li><li>Classic Beverage Package (2 hr)</li><li>Sparkling, white, red, beer</li><li>Non-alcoholic options</li></ul>
+      </div>
+    </div><div class="pkg-card">
+      <div class="pkg-name"><em>Three Hour Cocktail Party</em></div>
+      <div class="pkg-duration">3 hours</div>
+      <div class="pkg-price">$160 <small>per person</small></div>
+      <div class="pkg-desc">Inclusive of 7 canape items, one substantial and one dessert item and three hour Classic Beverage Package.</div>
+      <div class="pkg-includes">
+        <ul><li>7 canape items</li><li>1 substantial item</li><li>1 dessert item</li><li>Classic Beverage Package (3 hr)</li></ul>
+      </div>
+    </div><div class="pkg-card">
+      <div class="pkg-name"><em>Four Hour Cocktail Party</em></div>
+      <div class="pkg-duration">4 hours</div>
+      <div class="pkg-price">$180 <small>per person</small></div>
+      <div class="pkg-desc">Inclusive of 8 canape items, two substantials, one dessert and one supper item and four hour Classic Beverage Package.</div>
+      <div class="pkg-includes">
+        <ul><li>8 canape items</li><li>2 substantial items</li><li>1 dessert item</li><li>1 supper item</li><li>Classic Beverage Package (4 hr)</li></ul>
+      </div>
+    </div><div class="pkg-card">
+      <div class="pkg-name"><em>Five Hour Cocktail Party</em></div>
+      <div class="pkg-duration">5 hours</div>
+      <div class="pkg-price">$200 <small>per person</small></div>
+      <div class="pkg-desc">Inclusive of 8 canape items, two substantials, two desserts and two supper items and five hour Classic Beverage Package.</div>
+      <div class="pkg-includes">
+        <ul><li>8 canape items</li><li>2 substantial items</li><li>2 dessert items</li><li>2 supper items</li><li>Classic Beverage Package (5 hr)</li></ul>
+      </div>
+    </div></div>
+
+  <!-- ============ STEP 4: BEVERAGES ============ -->
+  <h2 class="section"><span><em>Beverage</em> Package</span><span class="step-num">Step 04</span></h2>
+  <p class="hint" style="margin-bottom: 14px;">Cocktail Party packages already include a Classic beverage package — selecting an upgrade here replaces it.</p>
+
+  <div id="beverage-grid" class="pkg-grid"><div class="pkg-card selected">
+      <div class="pkg-name"><em>No Package / Inc. with Event</em></div>
+      <div class="pkg-duration">—</div>
+      <div class="pkg-price">— </div>
+      <div class="pkg-desc">Cocktail Parties already include the Classic package.</div>
+      <div class="pkg-includes">
+        <ul><li>Already included in Cocktail Party packages</li><li>Or beverages on consumption (see Add-ons)</li></ul>
+      </div>
+    </div><div class="pkg-card">
+      <div class="pkg-name"><em>Classic</em></div>
+      <div class="pkg-duration">2 hours</div>
+      <div class="pkg-price">$40 <small>per person</small></div>
+      <div class="pkg-desc"></div>
+      <div class="pkg-includes">
+        <ul><li>NV Sparkling Tatachilla</li><li>Sauv Blanc Semillon Hartogs</li><li>Cabernet Merlot Hartogs</li><li>Carlton Draught</li><li>Non-alc selection</li></ul>
+      </div>
+    </div><div class="pkg-card">
+      <div class="pkg-name"><em>Classic</em></div>
+      <div class="pkg-duration">3 hours</div>
+      <div class="pkg-price">$47 <small>per person</small></div>
+      <div class="pkg-desc"></div>
+      <div class="pkg-includes">
+        <ul><li>As Classic 2hr</li></ul>
+      </div>
+    </div><div class="pkg-card">
+      <div class="pkg-name"><em>Classic</em></div>
+      <div class="pkg-duration">4 hours</div>
+      <div class="pkg-price">$50 <small>per person</small></div>
+      <div class="pkg-desc"></div>
+      <div class="pkg-includes">
+        <ul><li>As Classic 2hr</li></ul>
+      </div>
+    </div><div class="pkg-card">
+      <div class="pkg-name"><em>Classic</em></div>
+      <div class="pkg-duration">5 hours</div>
+      <div class="pkg-price">$57 <small>per person</small></div>
+      <div class="pkg-desc"></div>
+      <div class="pkg-includes">
+        <ul><li>As Classic 2hr</li></ul>
+      </div>
+    </div><div class="pkg-card">
+      <div class="pkg-name"><em>Signature</em></div>
+      <div class="pkg-duration">2 hours</div>
+      <div class="pkg-price">$50 <small>per person</small></div>
+      <div class="pkg-desc"></div>
+      <div class="pkg-includes">
+        <ul><li>NV Prosecco Cavaliere D'Oro</li><li>Choice of 4 still wines</li><li>Peroni Nastro Azzurro</li><li>Non-alc selection</li></ul>
+      </div>
+    </div><div class="pkg-card">
+      <div class="pkg-name"><em>Signature</em></div>
+      <div class="pkg-duration">3 hours</div>
+      <div class="pkg-price">$60 <small>per person</small></div>
+      <div class="pkg-desc"></div>
+      <div class="pkg-includes">
+        <ul><li>As Signature 2hr</li></ul>
+      </div>
+    </div><div class="pkg-card">
+      <div class="pkg-name"><em>Signature</em></div>
+      <div class="pkg-duration">4 hours</div>
+      <div class="pkg-price">$65 <small>per person</small></div>
+      <div class="pkg-desc"></div>
+      <div class="pkg-includes">
+        <ul><li>As Signature 2hr</li></ul>
+      </div>
+    </div><div class="pkg-card">
+      <div class="pkg-name"><em>Signature</em></div>
+      <div class="pkg-duration">5 hours</div>
+      <div class="pkg-price">$70 <small>per person</small></div>
+      <div class="pkg-desc"></div>
+      <div class="pkg-includes">
+        <ul><li>As Signature 2hr</li></ul>
+      </div>
+    </div><div class="pkg-card">
+      <div class="pkg-name"><em>Indulge</em></div>
+      <div class="pkg-duration">2 hours</div>
+      <div class="pkg-price">$70 <small>per person</small></div>
+      <div class="pkg-desc"></div>
+      <div class="pkg-includes">
+        <ul><li>MV Clover Hill Tasmanian Cuvee</li><li>Choice of 4 premium still wines</li><li>Harcourt Apple Cider + 2 beers</li><li>Non-alc + sparkling water</li></ul>
+      </div>
+    </div><div class="pkg-card">
+      <div class="pkg-name"><em>Indulge</em></div>
+      <div class="pkg-duration">3 hours</div>
+      <div class="pkg-price">$80 <small>per person</small></div>
+      <div class="pkg-desc"></div>
+      <div class="pkg-includes">
+        <ul><li>As Indulge 2hr</li></ul>
+      </div>
+    </div><div class="pkg-card">
+      <div class="pkg-name"><em>Indulge</em></div>
+      <div class="pkg-duration">4 hours</div>
+      <div class="pkg-price">$90 <small>per person</small></div>
+      <div class="pkg-desc"></div>
+      <div class="pkg-includes">
+        <ul><li>As Indulge 2hr</li></ul>
+      </div>
+    </div><div class="pkg-card">
+      <div class="pkg-name"><em>Indulge</em></div>
+      <div class="pkg-duration">5 hours</div>
+      <div class="pkg-price">$95 <small>per person</small></div>
+      <div class="pkg-desc"></div>
+      <div class="pkg-includes">
+        <ul><li>As Indulge 2hr</li></ul>
+      </div>
+    </div></div>
+
+  <!-- ============ STEP 5: EXTRAS ============ -->
+  <h2 class="section"><span>Add-ons &amp; <em>Extras</em></span><span class="step-num">Step 05</span></h2>
+
+  <div class="tabs" id="extras-tabs">
+    <button class="tab active" data-extras="bev-extras">Beverage</button>
+    <button class="tab" data-extras="culinary">Culinary Stations</button>
+    <button class="tab" data-extras="menu-add">Menu Additions</button>
+    <button class="tab" data-extras="venue-add">Venue / AV</button>
+    <button class="tab" data-extras="custom">Custom Items</button>
+  </div>
+
+  <div id="extras-content"><div class="extras-section"><div class="extras-cat-title">Event Extensions</div><div class="extra-row">
+        <div class="ex-name">
+          <strong>Classic Package extension</strong>
+          <small>Per half hour</small>
+        </div>
+        <div class="ex-unit">$8.00<br>per person / 30min</div>
+        <input type="number" min="0" step="1" value="0" data-extra="ext-classic-30">
+        <div class="ex-price">—</div>
+        <div></div>
+      </div><div class="extra-row">
+        <div class="ex-name">
+          <strong>Signature Package extension</strong>
+          <small>Per half hour</small>
+        </div>
+        <div class="ex-unit">$13.00<br>per person / 30min</div>
+        <input type="number" min="0" step="1" value="0" data-extra="ext-sig-30">
+        <div class="ex-price">—</div>
+        <div></div>
+      </div><div class="extra-row">
+        <div class="ex-name">
+          <strong>Indulge Package extension</strong>
+          <small>Per half hour</small>
+        </div>
+        <div class="ex-unit">$18.00<br>per person / 30min</div>
+        <input type="number" min="0" step="1" value="0" data-extra="ext-ind-30">
+        <div class="ex-price">—</div>
+        <div></div>
+      </div><div class="extra-row">
+        <div class="ex-name">
+          <strong>Spirits extension</strong>
+          <small>In conjunction with beverage extension</small>
+        </div>
+        <div class="ex-unit">$5.00<br>per person / 30min</div>
+        <input type="number" min="0" step="1" value="0" data-extra="ext-spirits-30">
+        <div class="ex-price">—</div>
+        <div></div>
+      </div><div class="extra-row">
+        <div class="ex-name">
+          <strong>Non-Alcoholic Package extension</strong>
+          <small>Per half hour</small>
+        </div>
+        <div class="ex-unit">$8.00<br>per person / 30min</div>
+        <input type="number" min="0" step="1" value="0" data-extra="ext-nonalc-30">
+        <div class="ex-price">—</div>
+        <div></div>
+      </div></div><div class="extras-section"><div class="extras-cat-title">Beverage Upgrades</div><div class="extra-row">
+        <div class="ex-name">
+          <strong>Beer Upgrade</strong>
+          <small>Choose 2 from premium beer list</small>
+        </div>
+        <div class="ex-unit">$2.50<br>per person</div>
+        <input type="number" min="0" step="1" value="0" data-extra="bev-beer-up">
+        <div class="ex-price">—</div>
+        <div></div>
+      </div></div><div class="extras-section"><div class="extras-cat-title">Spirits</div><div class="extra-row">
+        <div class="ex-name">
+          <strong>Spirits Package</strong>
+          <small>6 base spirits, up to 5 hours</small>
+        </div>
+        <div class="ex-unit">$25.00<br>per person</div>
+        <input type="number" min="0" step="1" value="0" data-extra="sp-pkg">
+        <div class="ex-price">—</div>
+        <div></div>
+      </div><div class="extra-row">
+        <div class="ex-name">
+          <strong>Premium Spirits Package</strong>
+          <small>Grey Goose, Tanqueray No. 10, etc. up to 5hr</small>
+        </div>
+        <div class="ex-unit">$35.00<br>per person</div>
+        <input type="number" min="0" step="1" value="0" data-extra="sp-prem">
+        <div class="ex-price">—</div>
+        <div></div>
+      </div><div class="extra-row">
+        <div class="ex-name">
+          <strong>Spirits Corkage</strong>
+          <small>BYO spirits — max 1 bottle per 5 guests</small>
+        </div>
+        <div class="ex-unit">$15.00<br>per person</div>
+        <input type="number" min="0" step="1" value="0" data-extra="sp-cork">
+        <div class="ex-price">—</div>
+        <div></div>
+      </div></div><div class="extras-section"><div class="extras-cat-title">Champagne Towers</div><div class="extra-row">
+        <div class="ex-name">
+          <strong>Tatachilla Sparkling NV — Champagne Tower</strong>
+          <small>84 glasses included</small>
+        </div>
+        <div class="ex-unit">$630.00<br>per tower</div>
+        <input type="number" min="0" step="1" value="0" data-extra="ct-tat">
+        <div class="ex-price">—</div>
+        <div></div>
+      </div><div class="extra-row">
+        <div class="ex-name">
+          <strong>Cavaliere D'Oro Prosecco NV — Champagne Tower</strong>
+          <small>84 glasses included</small>
+        </div>
+        <div class="ex-unit">$765.00<br>per tower</div>
+        <input type="number" min="0" step="1" value="0" data-extra="ct-cav">
+        <div class="ex-price">—</div>
+        <div></div>
+      </div><div class="extra-row">
+        <div class="ex-name">
+          <strong>Bellini Peach Prosecco — Champagne Tower</strong>
+          <small>84 glasses included</small>
+        </div>
+        <div class="ex-unit">$885.00<br>per tower</div>
+        <input type="number" min="0" step="1" value="0" data-extra="ct-bell">
+        <div class="ex-price">—</div>
+        <div></div>
+      </div><div class="extra-row">
+        <div class="ex-name">
+          <strong>Clover Hill Cuvee NV — Champagne Tower</strong>
+          <small>84 glasses included</small>
+        </div>
+        <div class="ex-unit">$920.00<br>per tower</div>
+        <input type="number" min="0" step="1" value="0" data-extra="ct-clov">
+        <div class="ex-price">—</div>
+        <div></div>
+      </div><div class="extra-row">
+        <div class="ex-name">
+          <strong>Mumm Grand Cordon Brut NV — Champagne Tower</strong>
+          <small>84 glasses included</small>
+        </div>
+        <div class="ex-unit">$2,200.00<br>per tower</div>
+        <input type="number" min="0" step="1" value="0" data-extra="ct-mumm">
+        <div class="ex-price">—</div>
+        <div></div>
+      </div></div><div class="extras-section"><div class="extras-cat-title">Cocktails / Mocktails</div><div class="extra-row">
+        <div class="ex-name">
+          <strong>Cocktails on arrival (avg)</strong>
+          <small>Choose up to 3 — min 100 per variety</small>
+        </div>
+        <div class="ex-unit">$12.00<br>per cocktail</div>
+        <input type="number" min="0" step="1" value="0" data-extra="ck-arr">
+        <div class="ex-price">—</div>
+        <div></div>
+      </div><div class="extra-row">
+        <div class="ex-name">
+          <strong>Mocktails on arrival</strong>
+          <small>Choose up to 3 — min 30 per variety</small>
+        </div>
+        <div class="ex-unit">$6.50<br>per mocktail</div>
+        <input type="number" min="0" step="1" value="0" data-extra="mk-arr">
+        <div class="ex-price">—</div>
+        <div></div>
+      </div></div></div>
+
+  <!-- ============ STEP 6: NOTES ============ -->
+  <h2 class="section"><span><em>Notes</em> for Client</span><span class="step-num">Step 06</span></h2>
+  <label class="field">
+    <span class="lbl">Quote Notes (appears on PDF)</span>
+    <textarea id="notes" rows="4" placeholder="Any special arrangements, conditions, or notes for the client..."></textarea>
+  </label>
+
+</main>
+
+<aside class="summary" id="summary">
+  <div class="sum-title"><em>Summary</em></div>
+  <div class="sum-sub">Live Quote</div>
+
+  <div id="summary-body"><div class="sum-block">
+    <div class="sum-block-title">Event</div>
+    
+    <div class="sum-line dim"><span class="lbl">Glasshouse · Main Event Space + Pre-Event Space</span><span class="val">100 guests</span></div>
+    
+  </div><div class="sum-block"><div class="sum-block-title">Venue Hire</div><div class="sum-line"><span class="lbl">Main Event Space + Pre-Event Space — Event Space (evening)</span><span class="val">$3,500.00</span></div></div></div>
+
+  <div class="sum-total" id="sum-total">
+    <div class="row"><span>Subtotal</span><span class="val" id="t-subtotal">$3,500.00</span></div>
+    <div class="row dim"><span>GST inclusive</span><span class="val">—</span></div>
+    <div class="row big"><span>Total</span><span class="val" id="t-total">$3,500.00</span></div>
+  </div>
+
+  <div class="autosave-status"><span class="dot" style="background: var(--good);"></span><span id="autosave-text">Auto-saved 09:16 PM</span></div>
+</aside>
+
+</div>
+
+<div class="toast good" id="toast">New quote started</div>
+
+<script>
+/* =====================================================================
+   THE BIG GROUP — QUOTE BUILDER
+   All pricing data extracted from the supplied 2026 PDFs (GST inclusive).
+   ===================================================================== */
+
+const DATA = {
+  venue: {
+    glasshouse: {
+      name: "Glasshouse",
+      address: "Olympic Park Oval, Olympic Blvd, Melbourne VIC 3001",
+      spaces: {
+        "main-event":     { name: "Main Event Space + Pre-Event Space", capacity: { cocktail: 1000, seated: 500, cabaret: 400, theatre: 500 } },
+        "main-balcony":   { name: "Main Event Space + Balcony", capacity: { cocktail: 60 } },
+        "larger-half":    { name: "Larger Half", capacity: { cocktail: 700, seated: 350, cabaret: 250, theatre: 300 } },
+        "smaller-half":   { name: "Smaller Half", capacity: { cocktail: 300, seated: 150, cabaret: 100, theatre: 200 } },
+        "pre-event":      { name: "Pre-Event Space (only)", capacity: { cocktail: 300 } },
+        "boardroom":      { name: "Boardroom", capacity: { boardroom: 24 } },
+        "exec-suites":    { name: "Executive Suites", capacity: { boardroom: 32, cocktail: 70 } },
+      },
+      hire: {
+        // event space
+        "event-space":    { label: "Event Space (evening)", price: 3500, applies: ["main-event","main-balcony","larger-half","smaller-half","pre-event"] },
+        // boardroom
+        "br-breakfast":   { label: "Boardroom — Breakfast Hire", price: 1000, applies: ["boardroom"] },
+        "br-half":        { label: "Boardroom — Half Day Hire", price: 1000, applies: ["boardroom"] },
+        "br-full":        { label: "Boardroom — Full Day/Night Hire", price: 2000, applies: ["boardroom"] },
+        // exec
+        "es-breakfast":   { label: "Executive Suites — Breakfast Hire", price: 500, applies: ["exec-suites"] },
+        "es-half":        { label: "Executive Suites — Half Day Hire", price: 500, applies: ["exec-suites"] },
+        "es-full":        { label: "Executive Suites — Full Day/Night Hire", price: 1000, applies: ["exec-suites"] },
+      }
+    }
+  },
+
+  /* ============ COCKTAIL PARTY PACKAGES ============ */
+  cocktailPackages: [
+    {
+      id: "cock-2", name: "Two Hour Cocktail Party", duration: "2 hours", price: 140,
+      desc: "Inclusive of 7 canape items and two hour Classic Beverage Package.",
+      includes: ["7 canape items", "Classic Beverage Package (2 hr)", "Sparkling, white, red, beer", "Non-alcoholic options"]
+    },
+    {
+      id: "cock-3", name: "Three Hour Cocktail Party", duration: "3 hours", price: 160,
+      desc: "Inclusive of 7 canape items, one substantial and one dessert item and three hour Classic Beverage Package.",
+      includes: ["7 canape items", "1 substantial item", "1 dessert item", "Classic Beverage Package (3 hr)"]
+    },
+    {
+      id: "cock-4", name: "Four Hour Cocktail Party", duration: "4 hours", price: 180,
+      desc: "Inclusive of 8 canape items, two substantials, one dessert and one supper item and four hour Classic Beverage Package.",
+      includes: ["8 canape items", "2 substantial items", "1 dessert item", "1 supper item", "Classic Beverage Package (4 hr)"]
+    },
+    {
+      id: "cock-5", name: "Five Hour Cocktail Party", duration: "5 hours", price: 200,
+      desc: "Inclusive of 8 canape items, two substantials, two desserts and two supper items and five hour Classic Beverage Package.",
+      includes: ["8 canape items", "2 substantial items", "2 dessert items", "2 supper items", "Classic Beverage Package (5 hr)"]
+    },
+  ],
+
+  /* ============ PLATED & SHARED PACKAGES ============ */
+  platedPackages: [
+    {
+      id: "plat-2c", name: "Plated Two Course", duration: "Dining", price: 145,
+      desc: "Three canapes, ciabatta rolls, alternating main with seasonal salad, plus your choice of single plated entrée OR two roaming dessert canapes.",
+      includes: ["3 chef's canapes", "Freshly baked ciabatta rolls", "Alternating main + seasonal salad", "Entrée OR 2 dessert canapes", "Tea, coffee & homemade treats"]
+    },
+    {
+      id: "plat-3c", name: "Plated Three Course", duration: "Dining", price: 170,
+      desc: "Three canapes, ciabatta rolls, plated entrée, alternating main with seasonal salad, two roaming dessert canapes.",
+      includes: ["3 chef's canapes", "Freshly baked ciabatta rolls", "Plated entrée", "Alternating main + seasonal salad", "2 roaming dessert canapes", "Tea, coffee & homemade treats"]
+    },
+    {
+      id: "plat-shared", name: "Shared Menu", duration: "Dining", price: 186,
+      desc: "Two canapes, ciabatta rolls, two shared entrées, three shared mains (2 protein + 1 vegetarian), two sides, two roaming dessert canapes.",
+      includes: ["2 canapes", "Freshly baked ciabatta rolls", "2 shared entrée dishes", "3 shared main dishes", "2 side dishes", "2 roaming dessert canapes"]
+    },
+  ],
+
+  /* ============ CORPORATE PACKAGES ============ */
+  corporatePackages: [
+    {
+      id: "corp-cb", name: "Cocktail Breakfast", duration: "2 hours", price: 64,
+      desc: "Four canape items. Freshly brewed coffee, assorted teas, herbal infusions and juices throughout.",
+      includes: ["4 canape items", "Freshly brewed coffee & teas", "Herbal infusions", "Assorted juices"]
+    },
+    {
+      id: "corp-pb", name: "Plated Breakfast", duration: "3 hours", price: 82,
+      desc: "Shared items served to the table and a plated breakfast with two sides per person. Coffee, teas, infusions and juices throughout.",
+      includes: ["Shared items to table", "Plated breakfast + 2 sides", "Coffee, tea, infusions", "Assorted juices"]
+    },
+    {
+      id: "corp-mt2", name: "Morning / Afternoon Tea", duration: "2 hours", price: 62,
+      desc: "Four canape items. Freshly brewed coffee, assorted teas, herbal infusions and juices throughout.",
+      includes: ["4 canape items", "Coffee, tea & herbal infusions", "Assorted juices"]
+    },
+    {
+      id: "corp-mt3", name: "Morning / Afternoon Tea (3hr)", duration: "3 hours", price: 75,
+      desc: "Five canape items. Freshly brewed coffee, assorted teas, herbal infusions and juices throughout.",
+      includes: ["5 canape items", "Coffee, tea & herbal infusions", "Assorted juices"]
+    },
+    {
+      id: "corp-half", name: "Half Day Executive", duration: "Up to 5 hours", price: 88,
+      desc: "Two morning OR afternoon tea items, working lunch, tea, coffee and fresh juice.",
+      includes: ["2 morning OR afternoon tea items", "Working lunch", "Tea, coffee & fresh juice"]
+    },
+    {
+      id: "corp-full", name: "Full Day Executive", duration: "Up to 8 hours", price: 117,
+      desc: "Two morning AND afternoon tea items, working lunch, tea, coffee and fresh juice.",
+      includes: ["2 morning + 2 afternoon tea items", "Working lunch", "Tea, coffee & fresh juice"]
+    },
+    {
+      id: "corp-ca1", name: "1 Hour Cocktail Party Add-On", duration: "+1 hour", price: 120,
+      desc: "Four canape items and one hour Classic Beverage Package.",
+      includes: ["4 canape items", "Classic Beverage Package (1 hr)"]
+    },
+    {
+      id: "corp-ca2", name: "2 Hour Cocktail Party Add-On", duration: "+2 hours", price: 140,
+      desc: "Seven canape items and two hour Classic Beverage Package.",
+      includes: ["7 canape items", "Classic Beverage Package (2 hr)"]
+    },
+  ],
+
+  /* ============ BEVERAGE PACKAGES ============ */
+  beveragePackages: [
+    { id: "bev-none", name: "No Package / Inc. with Event", desc: "Cocktail Parties already include the Classic package.", price: 0, duration: "—", note: true,
+      includes: ["Already included in Cocktail Party packages", "Or beverages on consumption (see Add-ons)"]
+    },
+    { id: "bev-c2", name: "Classic", duration: "2 hours", price: 40, includes: ["NV Sparkling Tatachilla","Sauv Blanc Semillon Hartogs","Cabernet Merlot Hartogs","Carlton Draught","Non-alc selection"] },
+    { id: "bev-c3", name: "Classic", duration: "3 hours", price: 47, includes: ["As Classic 2hr"] },
+    { id: "bev-c4", name: "Classic", duration: "4 hours", price: 50, includes: ["As Classic 2hr"] },
+    { id: "bev-c5", name: "Classic", duration: "5 hours", price: 57, includes: ["As Classic 2hr"] },
+    { id: "bev-s2", name: "Signature", duration: "2 hours", price: 50, includes: ["NV Prosecco Cavaliere D'Oro","Choice of 4 still wines","Peroni Nastro Azzurro","Non-alc selection"] },
+    { id: "bev-s3", name: "Signature", duration: "3 hours", price: 60, includes: ["As Signature 2hr"] },
+    { id: "bev-s4", name: "Signature", duration: "4 hours", price: 65, includes: ["As Signature 2hr"] },
+    { id: "bev-s5", name: "Signature", duration: "5 hours", price: 70, includes: ["As Signature 2hr"] },
+    { id: "bev-i2", name: "Indulge", duration: "2 hours", price: 70, includes: ["MV Clover Hill Tasmanian Cuvee","Choice of 4 premium still wines","Harcourt Apple Cider + 2 beers","Non-alc + sparkling water"] },
+    { id: "bev-i3", name: "Indulge", duration: "3 hours", price: 80, includes: ["As Indulge 2hr"] },
+    { id: "bev-i4", name: "Indulge", duration: "4 hours", price: 90, includes: ["As Indulge 2hr"] },
+    { id: "bev-i5", name: "Indulge", duration: "5 hours", price: 95, includes: ["As Indulge 2hr"] },
+  ],
+
+  /* ============ EXTRAS BY CATEGORY ============ */
+  extras: {
+    "bev-extras": {
+      label: "Beverage Add-ons",
+      items: [
+        // event extensions
+        { id:"ext-classic-30", name:"Classic Package extension", note:"Per half hour", price:8, unit:"per person / 30min", group:"Event Extensions" },
+        { id:"ext-sig-30",     name:"Signature Package extension", note:"Per half hour", price:13, unit:"per person / 30min", group:"Event Extensions" },
+        { id:"ext-ind-30",     name:"Indulge Package extension", note:"Per half hour", price:18, unit:"per person / 30min", group:"Event Extensions" },
+        { id:"ext-spirits-30", name:"Spirits extension", note:"In conjunction with beverage extension", price:5, unit:"per person / 30min", group:"Event Extensions" },
+        { id:"ext-nonalc-30",  name:"Non-Alcoholic Package extension", note:"Per half hour", price:8, unit:"per person / 30min", group:"Event Extensions" },
+        // upgrades
+        { id:"bev-beer-up", name:"Beer Upgrade", note:"Choose 2 from premium beer list", price:2.5, unit:"per person", group:"Beverage Upgrades" },
+        // spirits
+        { id:"sp-pkg",     name:"Spirits Package", note:"6 base spirits, up to 5 hours", price:25, unit:"per person", group:"Spirits" },
+        { id:"sp-prem",    name:"Premium Spirits Package", note:"Grey Goose, Tanqueray No. 10, etc. up to 5hr", price:35, unit:"per person", group:"Spirits" },
+        { id:"sp-cork",    name:"Spirits Corkage", note:"BYO spirits — max 1 bottle per 5 guests", price:15, unit:"per person", group:"Spirits" },
+        // champagne towers (per item)
+        { id:"ct-tat",  name:"Tatachilla Sparkling NV — Champagne Tower", note:"84 glasses included", price:630, unit:"per tower", group:"Champagne Towers" },
+        { id:"ct-cav",  name:"Cavaliere D'Oro Prosecco NV — Champagne Tower", note:"84 glasses included", price:765, unit:"per tower", group:"Champagne Towers" },
+        { id:"ct-bell", name:"Bellini Peach Prosecco — Champagne Tower", note:"84 glasses included", price:885, unit:"per tower", group:"Champagne Towers" },
+        { id:"ct-clov", name:"Clover Hill Cuvee NV — Champagne Tower", note:"84 glasses included", price:920, unit:"per tower", group:"Champagne Towers" },
+        { id:"ct-mumm", name:"Mumm Grand Cordon Brut NV — Champagne Tower", note:"84 glasses included", price:2200, unit:"per tower", group:"Champagne Towers" },
+        // cocktails on arrival
+        { id:"ck-arr",    name:"Cocktails on arrival (avg)", note:"Choose up to 3 — min 100 per variety", price:12, unit:"per cocktail", group:"Cocktails / Mocktails" },
+        { id:"mk-arr",    name:"Mocktails on arrival", note:"Choose up to 3 — min 30 per variety", price:6.5, unit:"per mocktail", group:"Cocktails / Mocktails" },
+      ]
+    },
+    "culinary": {
+      label: "Culinary Installations (Cocktail events)",
+      items: [
+        { id:"ci-oyster", name:"Oyster Bar", note:"Freshly shucked Australian oysters", price:27, unit:"per person", group:"Culinary Stations" },
+        { id:"ci-sushi",  name:"Sushi Bar", note:"Handmade sushi, sashimi, nigiri, egg rolls", price:40, unit:"per person", group:"Culinary Stations" },
+        { id:"ci-seafood",name:"Seafood Bar", note:"Prawns, oysters, smoked & cured salmon", price:37, unit:"per person", group:"Culinary Stations" },
+        { id:"ci-charc",  name:"Charcuterie Bar", note:"Cured meats, cheese, pâté, breads", price:39, unit:"per person", group:"Culinary Stations" },
+        { id:"ci-graze",  name:"Grazing Station", note:"Glazed ham, cheddar, salads, breads", price:38, unit:"per person", group:"Culinary Stations" },
+        { id:"ci-nacho",  name:"Nacho Bar", note:"Chipotle chicken, salsas, jalapenos", price:27, unit:"per person", group:"Culinary Stations" },
+        { id:"ci-pasta",  name:"Pasta Bar", note:"Two flavours served live", price:38, unit:"per person", group:"Culinary Stations" },
+        { id:"ci-bake",   name:"The Bakehouse", note:"Pies, pasties, sausage rolls baked on site", price:34, unit:"per person", group:"Culinary Stations" },
+        { id:"ci-cheese", name:"Cheese Bar", note:"Australian & imported cheese", price:31, unit:"per person", group:"Culinary Stations" },
+        { id:"ci-grill",  name:"Live Grill Bar", note:"Luminare/Ormond House only — please confirm", price:40, unit:"per person", group:"Culinary Stations" },
+        { id:"ci-hibachi",name:"Hibachi Bar", note:"Luminare/Ormond House only — please confirm", price:49, unit:"per person", group:"Culinary Stations" },
+        { id:"ci-pasta-wheel",name:"Parmesan Wheel Upgrade (Pasta Bar)", note:"Pasta tossed inside parmesan wheel", price:800, unit:"per wheel", group:"Culinary Stations" },
+      ]
+    },
+    "menu-add": {
+      label: "Menu Additions (Plated & Shared)",
+      items: [
+        { id:"ma-entree",  name:"Additional plated entrée course", note:"From $25 — confirm exact", price:25, unit:"per person", group:"Menu Additions" },
+        { id:"ma-alt",     name:"Entrée or dessert served alternately", note:"Per course", price:8, unit:"per person", group:"Menu Additions" },
+        { id:"ma-anti",    name:"Seasonal antipasto boards to table", note:"", price:15, unit:"per person", group:"Menu Additions" },
+        { id:"ma-dips",    name:"Dips and cured meat boards", note:"From $4", price:4, unit:"per person", group:"Menu Additions" },
+        { id:"ma-cheese-pp",name:"Individual plates of cheese & fruit", note:"", price:14, unit:"per person", group:"Menu Additions" },
+        { id:"ma-cheese-tb",name:"Cheese platter to the table", note:"Max 10 guests per platter", price:120, unit:"per platter", group:"Menu Additions" },
+        { id:"ma-band",    name:"Band & Crew meals (incl. refreshments)", note:"From $70", price:70, unit:"per person", group:"Menu Additions" },
+        { id:"ma-kids",    name:"Children's meals (3–12 years)", note:"3 courses", price:55, unit:"per child", group:"Menu Additions" },
+        // dietary
+        { id:"ma-diet",    name:"Special dietary fee", note:"Fructose-free, paleo, no-garlic etc.", price:30, unit:"per affected guest", group:"Dietary" },
+        // corporate menu adds
+        { id:"co-rice",    name:"Rice Paper Roll (lunch size)", note:"Add to Executive Day", price:9, unit:"per roll", group:"Corporate Add-ons" },
+        { id:"co-tea-add", name:"Additional morning/afternoon tea item", note:"", price:8, unit:"per person", group:"Corporate Add-ons" },
+      ]
+    },
+    "venue-add": {
+      label: "Venue, AV & Logistics",
+      items: [
+        { id:"va-dance",   name:"In-house Black Slate Dancefloor (8m × 8m)", note:"", price:850, unit:"flat", group:"Venue Hardware" },
+        { id:"va-av-tech", name:"AV Technician (4hr min)", note:"Min 4 hour booking", price:85, unit:"per hour", group:"AV / Production" },
+        { id:"va-security",name:"Additional Security Guard (estimate)", note:"Confirm with venue", price:65, unit:"per hour", group:"Security" },
+      ]
+    },
+  }
+};
+
+/* =====================================================================
+   STATE
+   ===================================================================== */
+const LS_KEY = "tbg_quote_state_v1";
+
+const defaultState = () => ({
+  client: { name:"", contact:"", email:"", phone:"" },
+  event: { name:"", date:"", ref: "BG-" + Date.now().toString(36).toUpperCase().slice(-5), rep:"" },
+  venue: "glasshouse",
+  space: "main-event",
+  hire: "event-space",
+  guests: 100,
+  eventType: "cocktail",
+  packageId: null,
+  beverageId: "bev-none",
+  // map of extra id -> qty
+  extras: {},
+  customExtras: [], // {id, name, price, unit, qty}
+  notes: ""
+});
+
+/* Initial state priority:
+   1. Embedded state (if this is a saved HTML quote being opened directly)
+   2. localStorage state (returning user)
+   3. Default blank state (first-time / blank template)
+*/
+let state;
+if (window.__TBG_EMBEDDED_STATE__) {
+  const existingLocal = loadState();
+  const hasExistingWork = existingLocal && (
+    existingLocal.client?.name ||
+    existingLocal.event?.name ||
+    existingLocal.packageId ||
+    Object.keys(existingLocal.extras || {}).length > 0
+  );
+  let useEmbedded = true;
+  if (hasExistingWork) {
+    const embeddedClient = window.__TBG_EMBEDDED_STATE__.client?.name || "(unnamed)";
+    const localClient = existingLocal.client?.name || "(unnamed)";
+    useEmbedded = confirm(
+      `This file contains a saved quote for: ${embeddedClient}\n\n` +
+      `You have unsaved work in this browser for: ${localClient}\n\n` +
+      `Load the saved quote? (Cancel to keep your current work.)`
+    );
+  }
+  if (useEmbedded) {
+    state = Object.assign(defaultState(), window.__TBG_EMBEDDED_STATE__);
+    try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e) {}
+  } else {
+    state = existingLocal;
+  }
+} else {
+  state = loadState() || defaultState();
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) { return null; }
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify(state));
+    setAutosaveStatus("Auto-saved " + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}));
+  } catch (e) {
+    setAutosaveStatus("Save failed", true);
+  }
+}
+
+let saveDebounceTimer;
+function debouncedSave() {
+  clearTimeout(saveDebounceTimer);
+  saveDebounceTimer = setTimeout(saveState, 400);
+}
+
+function setAutosaveStatus(text, isError=false) {
+  const el = document.getElementById("autosave-text");
+  if (el) {
+    el.textContent = text;
+    el.parentElement.querySelector(".dot").style.background = isError ? "var(--brand-red)" : "var(--good)";
+  }
+}
+
+/* =====================================================================
+   RENDERING
+   ===================================================================== */
+function $(id) { return document.getElementById(id); }
+const fmt = (n) => "$" + Number(n).toLocaleString('en-AU', {minimumFractionDigits:2, maximumFractionDigits:2});
+const fmtRound = (n) => "$" + Math.round(Number(n)).toLocaleString('en-AU');
+
+function renderAll() {
+  renderClient();
+  renderVenue();
+  renderPackages();
+  renderBeverages();
+  renderExtras();
+  renderNotes();
+  renderSummary();
+}
+
+function renderClient() {
+  $("client-name").value = state.client.name || "";
+  $("client-contact").value = state.client.contact || "";
+  $("client-email").value = state.client.email || "";
+  $("client-phone").value = state.client.phone || "";
+  $("event-name").value = state.event.name || "";
+  $("event-date").value = state.event.date || "";
+  $("quote-ref").value = state.event.ref || "";
+  $("sales-rep").value = state.event.rep || "";
+}
+
+function renderVenue() {
+  // space dropdown
+  const venue = DATA.venue[state.venue];
+  const spaceSel = $("space");
+  spaceSel.innerHTML = "";
+  Object.entries(venue.spaces).forEach(([k,v]) => {
+    const o = document.createElement("option");
+    o.value = k; o.textContent = v.name;
+    if (k === state.space) o.selected = true;
+    spaceSel.appendChild(o);
+  });
+
+  // hire dropdown — filter by selected space
+  const hireSel = $("hire-type");
+  hireSel.innerHTML = "";
+  const validHires = Object.entries(venue.hire).filter(([k,v]) => v.applies.includes(state.space));
+  if (validHires.length === 0) {
+    const o = document.createElement("option");
+    o.value = ""; o.textContent = "—";
+    hireSel.appendChild(o);
+    state.hire = "";
+  } else {
+    if (!validHires.find(([k]) => k === state.hire)) state.hire = validHires[0][0];
+    validHires.forEach(([k,v]) => {
+      const o = document.createElement("option");
+      o.value = k; o.textContent = v.label + " — " + fmtRound(v.price);
+      if (k === state.hire) o.selected = true;
+      hireSel.appendChild(o);
+    });
+  }
+
+  $("guests").value = state.guests;
+
+  // guest warning
+  const warn = $("guest-warn");
+  if (state.guests < 100) {
+    warn.innerHTML = '<span class="pill warn">Below 100 — surcharges apply</span>';
+  } else {
+    warn.innerHTML = '<span class="pill good">Min met</span>';
+  }
+}
+
+function renderPackages() {
+  // active tab
+  document.querySelectorAll("#event-tabs .tab").forEach(t => {
+    t.classList.toggle("active", t.dataset.event === state.eventType);
+  });
+
+  let pkgs;
+  if (state.eventType === "cocktail")  pkgs = DATA.cocktailPackages;
+  else if (state.eventType === "plated") pkgs = DATA.platedPackages;
+  else pkgs = DATA.corporatePackages;
+
+  const grid = $("package-grid");
+  grid.innerHTML = "";
+  pkgs.forEach(p => {
+    const card = document.createElement("div");
+    card.className = "pkg-card" + (state.packageId === p.id ? " selected" : "");
+    card.innerHTML = `
+      <div class="pkg-name"><em>${p.name}</em></div>
+      <div class="pkg-duration">${p.duration}</div>
+      <div class="pkg-price">${fmtRound(p.price)} <small>per person</small></div>
+      <div class="pkg-desc">${p.desc}</div>
+      <div class="pkg-includes">
+        <ul>${p.includes.map(i => `<li>${i}</li>`).join("")}</ul>
+      </div>
+    `;
+    card.onclick = () => {
+      state.packageId = (state.packageId === p.id) ? null : p.id;
+      renderPackages();
+      renderSummary();
+      debouncedSave();
+    };
+    grid.appendChild(card);
+  });
+}
+
+function renderBeverages() {
+  const grid = $("beverage-grid");
+  grid.innerHTML = "";
+  DATA.beveragePackages.forEach(b => {
+    const card = document.createElement("div");
+    card.className = "pkg-card" + (state.beverageId === b.id ? " selected" : "");
+    const priceText = b.price === 0 ? "—" : fmtRound(b.price);
+    const priceLabel = b.price === 0 ? "" : '<small>per person</small>';
+    card.innerHTML = `
+      <div class="pkg-name"><em>${b.name}</em></div>
+      <div class="pkg-duration">${b.duration}</div>
+      <div class="pkg-price">${priceText} ${priceLabel}</div>
+      <div class="pkg-desc">${b.desc || ""}</div>
+      <div class="pkg-includes">
+        <ul>${b.includes.map(i => `<li>${i}</li>`).join("")}</ul>
+      </div>
+    `;
+    card.onclick = () => {
+      state.beverageId = b.id;
+      renderBeverages();
+      renderSummary();
+      debouncedSave();
+    };
+    grid.appendChild(card);
+  });
+}
+
+let activeExtraTab = "bev-extras";
+function renderExtras() {
+  document.querySelectorAll("#extras-tabs .tab").forEach(t => {
+    t.classList.toggle("active", t.dataset.extras === activeExtraTab);
+  });
+
+  const container = $("extras-content");
+  container.innerHTML = "";
+
+  if (activeExtraTab === "custom") {
+    renderCustomExtras(container);
+    return;
+  }
+
+  const cat = DATA.extras[activeExtraTab];
+  // group by .group
+  const groups = {};
+  cat.items.forEach(it => {
+    if (!groups[it.group]) groups[it.group] = [];
+    groups[it.group].push(it);
+  });
+
+  Object.entries(groups).forEach(([groupName, items]) => {
+    const sec = document.createElement("div");
+    sec.className = "extras-section";
+    sec.innerHTML = `<div class="extras-cat-title">${groupName}</div>`;
+    items.forEach(item => {
+      const qty = state.extras[item.id] || 0;
+      const lineTotal = qty * item.price;
+      const row = document.createElement("div");
+      row.className = "extra-row";
+      row.innerHTML = `
+        <div class="ex-name">
+          <strong>${item.name}</strong>
+          ${item.note ? `<small>${item.note}</small>` : ""}
+        </div>
+        <div class="ex-unit">${fmt(item.price)}<br>${item.unit}</div>
+        <input type="number" min="0" step="1" value="${qty}" data-extra="${item.id}">
+        <div class="ex-price">${qty>0 ? fmt(lineTotal) : "—"}</div>
+        <div></div>
+      `;
+      sec.appendChild(row);
+    });
+    container.appendChild(sec);
+  });
+
+  // wire inputs
+  container.querySelectorAll('input[data-extra]').forEach(input => {
+    input.addEventListener("input", (e) => {
+      const id = e.target.dataset.extra;
+      const v = Math.max(0, parseInt(e.target.value) || 0);
+      if (v === 0) delete state.extras[id];
+      else state.extras[id] = v;
+      // update line total only (avoid full re-render to keep cursor)
+      const row = e.target.closest(".extra-row");
+      const item = findExtra(id);
+      if (item) {
+        const total = v * item.price;
+        row.querySelector(".ex-price").textContent = v > 0 ? fmt(total) : "—";
+      }
+      renderSummary();
+      debouncedSave();
+    });
+  });
+}
+
+function renderCustomExtras(container) {
+  const list = document.createElement("div");
+  list.innerHTML = `
+    <div class="extras-cat-title">Custom Line Items</div>
+    <p class="hint" style="margin-bottom: 14px;">Add anything not in the standard menu — bespoke catering, supplier markups, custom AV, styling, etc.</p>
+  `;
+
+  if (state.customExtras.length === 0) {
+    list.innerHTML += `<div class="sum-empty" style="padding: 12px 0;">No custom items yet.</div>`;
+  } else {
+    state.customExtras.forEach((it, idx) => {
+      const lineTotal = it.qty * it.price;
+      const row = document.createElement("div");
+      row.className = "extra-row";
+      row.innerHTML = `
+        <div class="ex-name">
+          <strong>${it.name || "(unnamed)"}</strong>
+          <small>${it.unit || ""}</small>
+        </div>
+        <div class="ex-unit">${fmt(it.price)}<br>${it.unit || "each"}</div>
+        <input type="number" min="0" step="1" value="${it.qty}" data-cqty="${idx}">
+        <div class="ex-price">${fmt(lineTotal)}</div>
+        <button class="del" data-cdel="${idx}" title="Remove">×</button>
+      `;
+      list.appendChild(row);
+    });
+  }
+
+  // add form
+  const form = document.createElement("div");
+  form.className = "add-custom";
+  form.innerHTML = `
+    <label class="field">
+      <span class="lbl">Item Name</span>
+      <input type="text" id="cust-name" placeholder="e.g. Floral arrangement">
+    </label>
+    <label class="field">
+      <span class="lbl">Unit Price</span>
+      <input type="number" id="cust-price" min="0" step="0.01" value="0">
+    </label>
+    <label class="field">
+      <span class="lbl">Unit / Qty</span>
+      <input type="text" id="cust-unit" placeholder="e.g. per person, flat, per hour">
+    </label>
+    <button id="cust-add">+ Add Item</button>
+  `;
+  list.appendChild(form);
+
+  container.appendChild(list);
+
+  // wire
+  list.querySelectorAll('input[data-cqty]').forEach(input => {
+    input.addEventListener("input", (e) => {
+      const idx = parseInt(e.target.dataset.cqty);
+      state.customExtras[idx].qty = Math.max(0, parseInt(e.target.value) || 0);
+      const row = e.target.closest(".extra-row");
+      row.querySelector(".ex-price").textContent = fmt(state.customExtras[idx].qty * state.customExtras[idx].price);
+      renderSummary();
+      debouncedSave();
+    });
+  });
+  list.querySelectorAll('button[data-cdel]').forEach(btn => {
+    btn.onclick = () => {
+      const idx = parseInt(btn.dataset.cdel);
+      state.customExtras.splice(idx, 1);
+      renderExtras();
+      renderSummary();
+      debouncedSave();
+    };
+  });
+
+  document.getElementById("cust-add").onclick = () => {
+    const name = document.getElementById("cust-name").value.trim();
+    const price = parseFloat(document.getElementById("cust-price").value) || 0;
+    const unit = document.getElementById("cust-unit").value.trim() || "each";
+    if (!name) { showToast("Enter an item name", "error"); return; }
+    state.customExtras.push({ name, price, unit, qty: 1 });
+    renderExtras();
+    renderSummary();
+    debouncedSave();
+  };
+}
+
+function findExtra(id) {
+  for (const cat of Object.values(DATA.extras)) {
+    const found = cat.items.find(i => i.id === id);
+    if (found) return found;
+  }
+  return null;
+}
+
+function renderNotes() {
+  $("notes").value = state.notes || "";
+}
+
+/* =====================================================================
+   CALCULATION
+   ===================================================================== */
+function calcQuote() {
+  const venue = DATA.venue[state.venue];
+  const hire = venue.hire[state.hire];
+  const space = venue.spaces[state.space];
+
+  const result = {
+    venueName: venue.name,
+    spaceName: space ? space.name : "",
+    hireLabel: hire ? hire.label : "—",
+    hirePrice: hire ? hire.price : 0,
+    guests: state.guests,
+    lines: [],
+    subtotal: 0,
+  };
+
+  // venue hire
+  if (hire) {
+    result.lines.push({
+      cat: "Venue Hire",
+      desc: `${space ? space.name : ""} — ${hire.label}`,
+      qty: 1, unitPrice: hire.price, total: hire.price
+    });
+    result.subtotal += hire.price;
+  }
+
+  // event package
+  let pkg = null;
+  const allPkgs = [...DATA.cocktailPackages, ...DATA.platedPackages, ...DATA.corporatePackages];
+  pkg = allPkgs.find(p => p.id === state.packageId);
+  if (pkg) {
+    const total = pkg.price * state.guests;
+    result.lines.push({
+      cat: "Event Package",
+      desc: `${pkg.name} (${pkg.duration})`,
+      qty: state.guests, unitPrice: pkg.price, total: total
+    });
+    result.subtotal += total;
+    result.packageName = pkg.name;
+    result.packageIncludes = pkg.includes;
+    result.packageDesc = pkg.desc;
+  }
+
+  // beverage package
+  const bev = DATA.beveragePackages.find(b => b.id === state.beverageId);
+  if (bev && bev.price > 0) {
+    const total = bev.price * state.guests;
+    result.lines.push({
+      cat: "Beverage Package",
+      desc: `${bev.name} ${bev.duration}`,
+      qty: state.guests, unitPrice: bev.price, total: total
+    });
+    result.subtotal += total;
+    result.beverageName = bev.name + " " + bev.duration;
+    result.beverageIncludes = bev.includes;
+  } else if (bev && bev.note) {
+    result.beverageName = "Included in package";
+    result.beverageIncludes = bev.includes;
+  }
+
+  // extras
+  Object.entries(state.extras).forEach(([id, qty]) => {
+    if (qty <= 0) return;
+    const item = findExtra(id);
+    if (!item) return;
+    const total = qty * item.price;
+    // determine if "per person" should multiply by guests automatically? No — user types quantity
+    result.lines.push({
+      cat: item.group,
+      desc: item.name,
+      qty: qty,
+      unitPrice: item.price,
+      unit: item.unit,
+      total: total
+    });
+    result.subtotal += total;
+  });
+
+  // custom extras
+  state.customExtras.forEach(it => {
+    if (it.qty <= 0 || !it.price) return;
+    const total = it.qty * it.price;
+    result.lines.push({
+      cat: "Custom",
+      desc: it.name,
+      qty: it.qty,
+      unitPrice: it.price,
+      unit: it.unit,
+      total: total
+    });
+    result.subtotal += total;
+  });
+
+  result.total = result.subtotal;
+  result.perGuest = state.guests > 0 ? (result.total / state.guests) : 0;
+
+  return result;
+}
+
+/* =====================================================================
+   SUMMARY RENDER
+   ===================================================================== */
+function renderSummary() {
+  const q = calcQuote();
+  const body = $("summary-body");
+  body.innerHTML = "";
+
+  // event block
+  const eventBlock = document.createElement("div");
+  eventBlock.className = "sum-block";
+  eventBlock.innerHTML = `
+    <div class="sum-block-title">Event</div>
+    ${state.event.name ? `<div class="sum-line"><span class="lbl">${state.event.name}</span><span class="val"></span></div>` : ""}
+    <div class="sum-line dim"><span class="lbl">${q.venueName} · ${q.spaceName}</span><span class="val">${state.guests} guests</span></div>
+    ${state.event.date ? `<div class="sum-line dim"><span class="lbl">Date</span><span class="val">${state.event.date}</span></div>` : ""}
+  `;
+  body.appendChild(eventBlock);
+
+  // line items grouped by category
+  if (q.lines.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "sum-empty";
+    empty.textContent = "Select a package to begin.";
+    body.appendChild(empty);
+  } else {
+    const groups = {};
+    q.lines.forEach(l => {
+      if (!groups[l.cat]) groups[l.cat] = [];
+      groups[l.cat].push(l);
+    });
+    Object.entries(groups).forEach(([cat, lines]) => {
+      const block = document.createElement("div");
+      block.className = "sum-block";
+      let html = `<div class="sum-block-title">${cat}</div>`;
+      lines.forEach(l => {
+        const qtyStr = l.qty > 1 ? `<span class="lbl"><span style="font-size:11px;color:var(--muted)">${l.qty} × ${fmt(l.unitPrice)}${l.unit?' '+l.unit:''}</span><br>${l.desc}</span>` : `<span class="lbl">${l.desc}</span>`;
+        html += `<div class="sum-line">${qtyStr}<span class="val">${fmt(l.total)}</span></div>`;
+      });
+      block.innerHTML = html;
+      body.appendChild(block);
+    });
+  }
+
+  $("t-subtotal").textContent = fmt(q.subtotal);
+  $("t-total").textContent = fmt(q.total);
+}
+
+/* =====================================================================
+   EVENT WIRING
+   ===================================================================== */
+function wireEvents() {
+  // client fields
+  ["client-name","client-contact","client-email","client-phone"].forEach(id => {
+    $(id).addEventListener("input", e => {
+      const key = id.replace("client-","");
+      state.client[key] = e.target.value;
+      debouncedSave();
+    });
+  });
+  ["event-name","event-date","quote-ref","sales-rep"].forEach(id => {
+    $(id).addEventListener("input", e => {
+      const key = id === "quote-ref" ? "ref" : (id === "sales-rep" ? "rep" : id.replace("event-",""));
+      state.event[key] = e.target.value;
+      renderSummary();
+      debouncedSave();
+    });
+  });
+
+  // venue
+  $("space").addEventListener("change", e => {
+    state.space = e.target.value;
+    renderVenue();
+    renderSummary();
+    debouncedSave();
+  });
+  $("hire-type").addEventListener("change", e => {
+    state.hire = e.target.value;
+    renderSummary();
+    debouncedSave();
+  });
+  $("guests").addEventListener("input", e => {
+    state.guests = Math.max(1, parseInt(e.target.value) || 0);
+    renderVenue();
+    renderSummary();
+    debouncedSave();
+  });
+
+  // event type tabs
+  document.querySelectorAll("#event-tabs .tab").forEach(t => {
+    t.addEventListener("click", () => {
+      state.eventType = t.dataset.event;
+      // clear package selection if switching
+      state.packageId = null;
+      renderPackages();
+      renderSummary();
+      debouncedSave();
+    });
+  });
+
+  // extras tabs
+  document.querySelectorAll("#extras-tabs .tab").forEach(t => {
+    t.addEventListener("click", () => {
+      activeExtraTab = t.dataset.extras;
+      renderExtras();
+    });
+  });
+
+  // notes
+  $("notes").addEventListener("input", e => {
+    state.notes = e.target.value;
+    debouncedSave();
+  });
+
+  // header buttons
+  $("btn-export-json").addEventListener("click", exportJSON);
+  $("btn-import").addEventListener("click", () => $("import-file").click());
+  $("import-file").addEventListener("change", importFile);
+  $("btn-export-pdf").addEventListener("click", exportPDF);
+  $("btn-save-html").addEventListener("click", saveAsHTML);
+  $("btn-blank").addEventListener("click", downloadBlankTemplate);
+  $("btn-theme").addEventListener("click", toggleTheme);
+  $("btn-clear").addEventListener("click", () => {
+    if (confirm("Clear all fields and start a new quote?\n\nThis cannot be undone — save your current quote first if you need it.")) {
+      state = defaultState();
+      saveState();
+      renderAll();
+      showToast("New quote started", "good");
+    }
+  });
+}
+
+/* =====================================================================
+   THEME TOGGLE
+   ===================================================================== */
+const THEME_KEY = "tbg_theme";
+function applyTheme(theme) {
+  const root = document.documentElement;
+  if (theme === "dark") {
+    root.setAttribute("data-theme", "dark");
+    const btn = $("btn-theme");
+    if (btn) { btn.textContent = "☀"; btn.title = "Switch to light mode"; }
+  } else {
+    root.removeAttribute("data-theme");
+    const btn = $("btn-theme");
+    if (btn) { btn.textContent = "☾"; btn.title = "Switch to dark mode"; }
+  }
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+  const next = current === "dark" ? "light" : "dark";
+  applyTheme(next);
+  try { localStorage.setItem(THEME_KEY, next); } catch(e) {}
+}
+
+function initTheme() {
+  let saved = "light";
+  try { saved = localStorage.getItem(THEME_KEY) || "light"; } catch(e) {}
+  applyTheme(saved);
+}
+
+/* =====================================================================
+   IMPORT / EXPORT
+   ===================================================================== */
+function exportJSON() {
+  const payload = {
+    _format: "tbg-quote-v1",
+    _exported: new Date().toISOString(),
+    state: state
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type: "application/json"});
+  triggerDownload(blob, fileNameFor("json"));
+  showToast("Quote data saved", "good");
+}
+
+function fileNameFor(ext) {
+  const ref = state.event.ref || "quote";
+  const client = (state.client.name || "untitled").replace(/[^a-z0-9]/gi, "-").toLowerCase();
+  return `tbg-${client}-${ref}.${ext}`;
+}
+
+function triggerDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/* Handles both .json data files and .html quote files */
+function importFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  const isHtml = /\.html?$/i.test(file.name) || file.type === "text/html";
+
+  reader.onload = (ev) => {
+    try {
+      let parsedState;
+      if (isHtml) {
+        parsedState = extractStateFromHTML(ev.target.result);
+        if (!parsedState) throw new Error("No quote data found in HTML file");
+      } else {
+        const data = JSON.parse(ev.target.result);
+        if (data._format !== "tbg-quote-v1" || !data.state) throw new Error("Invalid file format");
+        parsedState = data.state;
+      }
+      state = Object.assign(defaultState(), parsedState);
+      saveState();
+      renderAll();
+      showToast("Quote loaded", "good");
+    } catch (err) {
+      showToast("Could not load file: " + err.message, "error");
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = "";
+}
+
+/* Pull the embedded state JSON out of a saved HTML file */
+function extractStateFromHTML(htmlText) {
+  const marker = /<script id="__tbg_embedded_state__"[^>]*>([\s\S]*?)<\/script>/;
+  const match = htmlText.match(marker);
+  if (!match) return null;
+  // The script body looks like: window.__TBG_EMBEDDED_STATE__ = { ... };
+  const jsonMatch = match[1].match(/=\s*([\s\S]*?);?\s*$/);
+  if (!jsonMatch) return null;
+  try {
+    return JSON.parse(jsonMatch[1]);
+  } catch(e) {
+    return null;
+  }
+}
+
+/* Save the entire app, with the current quote data baked in, as an HTML file */
+function saveAsHTML() {
+  const html = buildSelfContainedHTML(state);
+  const blob = new Blob([html], {type: "text/html"});
+  triggerDownload(blob, fileNameFor("html"));
+  showToast("Quote saved as HTML", "good");
+}
+
+/* Save a clean, blank copy of the app — no client data baked in */
+function downloadBlankTemplate() {
+  const html = buildSelfContainedHTML(null);
+  const blob = new Blob([html], {type: "text/html"});
+  triggerDownload(blob, "tbg-quote-builder-template.html");
+  showToast("Blank template downloaded — attach to email", "good");
+}
+
+/* Build a copy of the current document with embedded state injected (or removed for blank) */
+function buildSelfContainedHTML(stateToEmbed) {
+  // Get a clone of the current document to avoid mutating live page
+  const doctype = "<!DOCTYPE html>\n";
+  const docClone = document.documentElement.cloneNode(true);
+
+  // Remove the data-theme attribute so the recipient sees their own theme preference
+  // (their browser's localStorage) rather than the sender's.
+  docClone.removeAttribute("data-theme");
+
+  // Remove any pre-existing embedded state script
+  const existing = docClone.querySelector("#__tbg_embedded_state__");
+  if (existing) existing.remove();
+
+  // If we have state to embed, inject a script just after <head> open
+  if (stateToEmbed) {
+    const head = docClone.querySelector("head");
+    if (head) {
+      const script = document.createElement("script");
+      script.id = "__tbg_embedded_state__";
+      // Stringify with a closing-tag-safe escape
+      const json = JSON.stringify(stateToEmbed).replace(/<\/script/gi, "<\\/script");
+      script.textContent = `window.__TBG_EMBEDDED_STATE__ = ${json};`;
+      head.insertBefore(script, head.firstChild);
+    }
+  }
+
+  return doctype + docClone.outerHTML;
+}
+
+/* =====================================================================
+   PDF EXPORT — Glasshouse minimalist branding (b/w + accent)
+   ===================================================================== */
+function exportPDF() {
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    showToast("PDF library not loaded — try refresh", "error");
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const margin = 50;
+
+  const q = calcQuote();
+  const dateStr = new Date().toLocaleDateString("en-AU", {day:"numeric", month:"long", year:"numeric"});
+
+  // ===== Page 1: Cover =====
+  // black header band
+  doc.setFillColor(10,10,10);
+  doc.rect(0, 0, pageW, 90, "F");
+  doc.setTextColor(230,43,43);
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(13);
+  doc.setCharSpace(2);
+  doc.text("THE BIG GROUP", margin, 50);
+  doc.setCharSpace(0);
+  // small tag
+  doc.setTextColor(250,250,247);
+  doc.setFont("times","italic");
+  doc.setFontSize(11);
+  doc.text("Event Quotation", pageW - margin, 50, { align: "right" });
+
+  // hero title
+  doc.setTextColor(10,10,10);
+  doc.setFont("times","normal");
+  doc.setFontSize(46);
+  doc.text("Quotation", margin, 200);
+  doc.setFont("times","italic");
+  doc.text("for your consideration", margin, 250);
+
+  // client / event meta block
+  let y = 320;
+  doc.setDrawColor(216,212,204);
+  doc.setLineWidth(0.5);
+  doc.line(margin, y, pageW - margin, y);
+  y += 22;
+
+  doc.setFont("helvetica","normal");
+  doc.setFontSize(8);
+  doc.setTextColor(107,107,107);
+
+  const meta = [
+    ["PREPARED FOR", state.client.name || "—"],
+    ["CONTACT", [state.client.contact, state.client.email, state.client.phone].filter(Boolean).join(" · ") || "—"],
+    ["EVENT", state.event.name || "—"],
+    ["EVENT DATE", state.event.date ? new Date(state.event.date).toLocaleDateString("en-AU", {weekday:"long", day:"numeric", month:"long", year:"numeric"}) : "—"],
+    ["VENUE", `${q.venueName} — ${q.spaceName}`],
+    ["GUESTS", String(state.guests)],
+    ["QUOTE REFERENCE", state.event.ref || "—"],
+    ["PREPARED BY", state.event.rep || "The Big Group"],
+    ["QUOTE DATE", dateStr],
+  ];
+  meta.forEach(([k,v]) => {
+    doc.setFont("helvetica","bold");
+    doc.setTextColor(107,107,107);
+    doc.setFontSize(8);
+    doc.text(k, margin, y);
+    doc.setFont("helvetica","normal");
+    doc.setTextColor(10,10,10);
+    doc.setFontSize(11);
+    // wrap value
+    const wrapped = doc.splitTextToSize(v, pageW - margin - 200);
+    doc.text(wrapped, margin + 130, y);
+    y += Math.max(18, wrapped.length * 14);
+  });
+
+  // bottom: red total band
+  const bandY = pageH - 130;
+  doc.setFillColor(10,10,10);
+  doc.rect(0, bandY, pageW, 130, "F");
+  doc.setTextColor(250,250,247);
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(8);
+  doc.text("ESTIMATED TOTAL", margin, bandY + 30);
+  doc.setFont("times","normal");
+  doc.setFontSize(36);
+  doc.setTextColor(230,43,43);
+  doc.text(fmt(q.total), margin, bandY + 75);
+  doc.setTextColor(250,250,247);
+  doc.setFont("helvetica","normal");
+  doc.setFontSize(9);
+  doc.text(`Inclusive of GST  ·  ${fmt(q.perGuest)} per guest at ${state.guests} pax`, margin, bandY + 100);
+
+  // ===== Page 2: Itemised breakdown =====
+  doc.addPage();
+  drawHeader(doc, pageW, margin);
+  let cy = 130;
+
+  doc.setFont("times","normal");
+  doc.setFontSize(28);
+  doc.setTextColor(10,10,10);
+  doc.text("Quote ", margin, cy);
+  doc.setFont("times","italic");
+  doc.text("Breakdown", margin + 75, cy);
+
+  cy += 30;
+  doc.setDrawColor(216,212,204);
+  doc.line(margin, cy, pageW - margin, cy);
+  cy += 18;
+
+  // table
+  const tableBody = q.lines.map(l => [
+    l.cat,
+    l.desc,
+    String(l.qty) + (l.unit ? ` ${l.unit}` : ""),
+    fmt(l.unitPrice),
+    fmt(l.total)
+  ]);
+
+  doc.autoTable({
+    startY: cy,
+    head: [["Category", "Description", "Qty", "Unit Price", "Line Total"]],
+    body: tableBody,
+    theme: "plain",
+    headStyles: {
+      fillColor: [10,10,10],
+      textColor: [250,250,247],
+      fontStyle: "bold",
+      fontSize: 8,
+      cellPadding: 8,
+    },
+    bodyStyles: {
+      fontSize: 9,
+      cellPadding: 7,
+      textColor: [26,26,26],
+      lineColor: [232,229,221],
+      lineWidth: 0.4,
+    },
+    columnStyles: {
+      0: { cellWidth: 80, fontStyle: "bold" },
+      1: { cellWidth: "auto" },
+      2: { cellWidth: 80, halign: "right" },
+      3: { cellWidth: 70, halign: "right" },
+      4: { cellWidth: 75, halign: "right", fontStyle: "bold" },
+    },
+    margin: { left: margin, right: margin },
+    didDrawCell: function(data) {
+      // alternate row backgrounds
+      if (data.section === "body" && data.row.index % 2 === 1) {
+        // optional
+      }
+    }
+  });
+
+  let endY = doc.lastAutoTable.finalY;
+
+  // totals box
+  if (endY + 100 > pageH - 80) {
+    doc.addPage();
+    drawHeader(doc, pageW, margin);
+    endY = 120;
+  }
+
+  endY += 20;
+  doc.setFillColor(242,240,234);
+  doc.rect(margin, endY, pageW - margin*2, 70, "F");
+  doc.setFont("helvetica","normal");
+  doc.setFontSize(10);
+  doc.setTextColor(107,107,107);
+  doc.text("Subtotal", margin + 16, endY + 24);
+  doc.text("GST (inclusive in all line items)", margin + 16, endY + 42);
+  doc.setFont("helvetica","bold");
+  doc.setTextColor(10,10,10);
+  doc.text(fmt(q.subtotal), pageW - margin - 16, endY + 24, { align:"right" });
+  doc.setFont("helvetica","normal");
+  doc.setTextColor(107,107,107);
+  doc.text("—", pageW - margin - 16, endY + 42, { align:"right" });
+
+  endY += 80;
+  doc.setFillColor(10,10,10);
+  doc.rect(margin, endY, pageW - margin*2, 50, "F");
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(10);
+  doc.setTextColor(250,250,247);
+  doc.text("TOTAL (GST inclusive)", margin + 16, endY + 30);
+  doc.setFont("times","normal");
+  doc.setFontSize(20);
+  doc.setTextColor(230,43,43);
+  doc.text(fmt(q.total), pageW - margin - 16, endY + 32, { align:"right" });
+
+  // ===== Page 3: Inclusions & notes =====
+  doc.addPage();
+  drawHeader(doc, pageW, margin);
+  let py = 130;
+
+  doc.setFont("times","normal");
+  doc.setFontSize(28);
+  doc.setTextColor(10,10,10);
+  doc.text("What's ", margin, py);
+  doc.setFont("times","italic");
+  doc.text("Included", margin + 92, py);
+
+  py += 30;
+  doc.setDrawColor(216,212,204);
+  doc.line(margin, py, pageW - margin, py);
+  py += 24;
+
+  // package inclusions
+  if (q.packageName) {
+    py = drawSubsection(doc, "EVENT PACKAGE", q.packageName, q.packageDesc || "", q.packageIncludes || [], margin, py, pageW);
+  }
+  if (q.beverageIncludes && q.beverageIncludes.length) {
+    py = drawSubsection(doc, "BEVERAGE PACKAGE", q.beverageName || "—", "", q.beverageIncludes, margin, py, pageW);
+  }
+
+  // venue inclusions (standard for event space)
+  py = drawSubsection(doc, "VENUE INCLUSIONS", q.spaceName, "Exclusive venue use. Inclusive of:", [
+    "2 hour bump-in prior to event start",
+    "1 hour bump-out post-event conclusion",
+    "Banquet chairs, round tables (up to 10 guests)",
+    "Table linen and white linen napkins",
+    "Personalised menus (one per table)",
+    "Tea light candles & glass votives",
+    "Access to green room & cloaking facilities",
+    "Security guards for the event duration",
+    "Custom lectern with microphone (technician extra)",
+  ], margin, py, pageW);
+
+  // client notes
+  if (state.notes && state.notes.trim()) {
+    if (py > pageH - 200) { doc.addPage(); drawHeader(doc, pageW, margin); py = 130; }
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(8);
+    doc.setTextColor(107,107,107);
+    doc.text("NOTES", margin, py);
+    py += 14;
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(10);
+    doc.setTextColor(26,26,26);
+    const wrappedNotes = doc.splitTextToSize(state.notes, pageW - margin*2);
+    doc.text(wrappedNotes, margin, py);
+    py += wrappedNotes.length * 13 + 18;
+  }
+
+  // ===== Page 4: T&Cs =====
+  doc.addPage();
+  drawHeader(doc, pageW, margin);
+  let ty = 130;
+  doc.setFont("times","normal");
+  doc.setFontSize(28);
+  doc.setTextColor(10,10,10);
+  doc.text("Terms & ", margin, ty);
+  doc.setFont("times","italic");
+  doc.text("Conditions", margin + 100, ty);
+
+  ty += 30;
+  doc.setDrawColor(216,212,204);
+  doc.line(margin, ty, pageW - margin, ty);
+  ty += 24;
+
+  const terms = [
+    ["MINIMUM NUMBERS", "Standard packages are based on a minimum of 100 guests. Should guest numbers fall beneath this, additional charges will apply."],
+    ["MENU PRICING", "Current menu prices are valid until 31st December 2026. For events post this date, please allow a price increase of approximately 3%."],
+    ["DIETARY REQUIREMENTS", "Vegetarian, vegan, gluten free/coeliac, dairy free/lactose free and nut free guests catered for at no additional charge. Other specific requirements (fructose free, no garlic, paleo etc.) incur a $30.00 per person dietary fee. All dietary requirements to be advised no later than 7 business days prior."],
+    ["BEVERAGES", "Events are licensed until 1am. Time extensions are charged based on confirmed total guest numbers."],
+    ["SECURITY", "A minimum of one security guard is required for every event. Additional guards may be required based on guest numbers and event nature."],
+    ["GST", "All prices quoted are inclusive of GST."],
+    ["VALIDITY", "This quotation is valid for 14 days from the date of issue. Final pricing subject to confirmation and contract."],
+  ];
+
+  terms.forEach(([title, body]) => {
+    if (ty > pageH - 100) { doc.addPage(); drawHeader(doc, pageW, margin); ty = 130; }
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(8);
+    doc.setTextColor(107,107,107);
+    doc.text(title, margin, ty);
+    ty += 12;
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(9.5);
+    doc.setTextColor(26,26,26);
+    const wrapped = doc.splitTextToSize(body, pageW - margin*2);
+    doc.text(wrapped, margin, ty);
+    ty += wrapped.length * 12 + 12;
+  });
+
+  // ===== footer on every page =====
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    drawFooter(doc, pageW, pageH, margin, i, pageCount, q);
+  }
+
+  // save
+  const ref = state.event.ref || "quote";
+  const client = (state.client.name || "client").replace(/[^a-z0-9]/gi, "-").toLowerCase();
+  doc.save(`TBG-Quote-${client}-${ref}.pdf`);
+  showToast("PDF generated", "good");
+}
+
+function drawHeader(doc, pageW, margin) {
+  doc.setFillColor(10,10,10);
+  doc.rect(0, 0, pageW, 70, "F");
+  doc.setTextColor(230,43,43);
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(10);
+  doc.setCharSpace(1.8);
+  doc.text("THE BIG GROUP", margin, 40);
+  doc.setCharSpace(0);
+  doc.setTextColor(250,250,247);
+  doc.setFont("times","italic");
+  doc.setFontSize(10);
+  doc.text("Event Quotation", pageW - margin, 40, { align:"right" });
+}
+
+function drawFooter(doc, pageW, pageH, margin, pageNum, total, q) {
+  doc.setDrawColor(216,212,204);
+  doc.setLineWidth(0.5);
+  doc.line(margin, pageH - 50, pageW - margin, pageH - 50);
+  doc.setFont("helvetica","normal");
+  doc.setFontSize(8);
+  doc.setTextColor(107,107,107);
+  doc.text("The Big Group  ·  enquiries@thebiggroup.com.au  ·  thebiggroup.com.au", margin, pageH - 32);
+  doc.text(`${q.venueName}  ·  ${state.event.ref || ""}`, margin, pageH - 20);
+  doc.text(`${pageNum} / ${total}`, pageW - margin, pageH - 20, { align:"right" });
+}
+
+function drawSubsection(doc, label, title, desc, items, margin, y, pageW) {
+  const pageH = doc.internal.pageSize.getHeight();
+  const estimatedHeight = 50 + (desc ? 18 : 0) + items.length * 14;
+  if (y + estimatedHeight > pageH - 80) {
+    doc.addPage();
+    drawHeader(doc, pageW, margin);
+    y = 130;
+  }
+
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(8);
+  doc.setTextColor(107,107,107);
+  doc.text(label, margin, y);
+  y += 14;
+
+  doc.setFont("times","normal");
+  doc.setFontSize(16);
+  doc.setTextColor(10,10,10);
+  doc.text(title, margin, y);
+  y += 18;
+
+  if (desc) {
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(9.5);
+    doc.setTextColor(107,107,107);
+    const wrapped = doc.splitTextToSize(desc, pageW - margin*2);
+    doc.text(wrapped, margin, y);
+    y += wrapped.length * 12 + 4;
+  }
+
+  doc.setFont("helvetica","normal");
+  doc.setFontSize(10);
+  doc.setTextColor(26,26,26);
+  items.forEach(it => {
+    doc.setTextColor(230,43,43);
+    doc.text("·", margin, y);
+    doc.setTextColor(26,26,26);
+    const wrapped = doc.splitTextToSize(it, pageW - margin*2 - 14);
+    doc.text(wrapped, margin + 10, y);
+    y += wrapped.length * 13;
+  });
+
+  y += 18;
+  return y;
+}
+
+/* =====================================================================
+   TOAST
+   ===================================================================== */
+function showToast(msg, type="") {
+  const t = $("toast");
+  t.className = "toast " + type;
+  t.textContent = msg;
+  setTimeout(() => t.classList.add("show"), 10);
+  setTimeout(() => t.classList.remove("show"), 2400);
+}
+
+/* =====================================================================
+   INIT
+   ===================================================================== */
+wireEvents();
+initTheme();
+renderAll();
+
+// keyboard shortcut: Cmd/Ctrl+S to save JSON
+document.addEventListener("keydown", e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === "s") {
+    e.preventDefault();
+    exportJSON();
+  }
+});
+</script>
+
+
+</body></html>
